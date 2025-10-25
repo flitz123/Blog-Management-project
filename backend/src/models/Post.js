@@ -1,20 +1,13 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
-const CommentSchema = new mongoose.Schema({
-  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-  text: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
-});
+const postSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    content: { type: String, required: true },
+    author: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }]
+  },
+  { timestamps: true }
+);
 
-const PostSchema = new mongoose.Schema({
-  author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  title: { type: String, required: true },
-  content: { type: String, required: true }, // store HTML from rich-text editor
-  tags: [String],
-  coverImage: String,
-  comments: [CommentSchema],
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: Date
-});
-
-module.exports = mongoose.model('Post', PostSchema);
+export default mongoose.model("Post", postSchema);

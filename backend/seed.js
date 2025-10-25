@@ -1,52 +1,22 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-import bcrypt from 'bcryptjs';
-import User from './src/models/User.js';
-import Post from './src/models/Post.js';
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 dotenv.config();
+connectDB();
 
-const seedDatabase = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
-    console.log('✅ Connected to MongoDB');
+const app = express();
+app.use(cors());
+app.use(express.json());
 
-    await User.deleteMany({});
-    await Post.deleteMany({});
+app.get("/", (req, res) => res.send("Blog API is running..."));
 
-    const hashedPassword = await bcrypt.hash('123456', 10);
+app.use("/api/auth", authRoutes);
+app.use("/api/posts", postRoutes);
 
-    const user = await User.create({
-      username: 'adminuser',
-      email: 'admin@example.com',
-      password: hashedPassword
-    });
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-    const posts = await Post.insertMany([
-      {
-        title: 'Welcome to My Blog!',
-        content:
-          'This is the first sample blog post. You can edit or delete it as you like!',
-        tags: ['intro', 'welcome'],
-        author: user._id
-      },
-      {
-        title: 'Building with MERN Stack',
-        content:
-          'Learn how to build a full-stack blog system using MongoDB, Express, React, and Node.js.',
-        tags: ['mern', 'development'],
-        author: user._id
-      }
-    ]);
-
-    console.log('✅ Seeded Users and Posts Successfully!');
-    console.log('👤 User Login: admin@example.com / 123456');
-    console.log(`📝 Created ${posts.length} sample posts`);
-    process.exit();
-  } catch (err) {
-    console.error('❌ Error seeding database:', err.message);
-    process.exit(1);
-  }
-};
-
-seedDatabase();

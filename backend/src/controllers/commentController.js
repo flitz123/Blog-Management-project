@@ -1,6 +1,6 @@
-const Post = require('../models/Post');
+import Post from '../models/Post.js';
 
-exports.addComment = async (req, res) => {
+const addComment = async (req, res) => {
   try {
     const { postId } = req.params;
     const { text } = req.body;
@@ -25,7 +25,7 @@ exports.addComment = async (req, res) => {
   }
 };
 
-exports.deleteComment = async (req, res) => {
+const deleteComment = async (req, res) => {
   try {
     const { postId, commentId } = req.params;
     const post = await Post.findById(postId);
@@ -46,3 +46,5 @@ exports.deleteComment = async (req, res) => {
     res.status(500).json({ msg: 'Server Error' });
   }
 };
+
+export default { addComment, deleteComment };

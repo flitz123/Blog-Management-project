@@ -5,8 +5,8 @@ const helmet = require('helmet');
 const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/auth');
-const postRoutes = require('./routes/posts');
-const commentRoutes = require('./routes/comments');
+const postRoutes = require('./routes/postsRoutes');
+const commentRoutes = require('./models/Comment');
 
 const app = express();
 app.use(helmet());
@@ -23,6 +23,3 @@ app.use('/api/comments', commentRoutes);
 app.get('/', (req,res)=> res.send('Blog API running'));
 
 app.listen(PORT, () => console.log(`Server listening on ${PORT}`));
-
-const errorHandler = require('./middleware/errorHandler');
-app.use(errorHandler);

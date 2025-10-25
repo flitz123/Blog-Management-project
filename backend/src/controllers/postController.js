@@ -1,6 +1,6 @@
-const Post = require('../models/Post');
+import Post from '../models/Post.js';
 
-exports.getAllPosts = async (req, res) => {
+const getAllPosts = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const posts = await Post.find()
@@ -16,7 +16,7 @@ exports.getAllPosts = async (req, res) => {
   }
 };
 
-exports.getPostById = async (req, res) => {
+const getPostById = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id)
       .populate('author', 'name email')
@@ -28,7 +28,7 @@ exports.getPostById = async (req, res) => {
   }
 };
 
-exports.createPost = async (req, res) => {
+const createPost = async (req, res) => {
   try {
     const { title, content, tags, coverImage } = req.body;
     const newPost = new Post({
@@ -46,7 +46,7 @@ exports.createPost = async (req, res) => {
   }
 };
 
-exports.updatePost = async (req, res) => {
+const updatePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ msg: 'Post not found' });
@@ -63,7 +63,7 @@ exports.updatePost = async (req, res) => {
   }
 };
 
-exports.deletePost = async (req, res) => {
+const deletePost = async (req, res) => {
   try {
     const post = await Post.findById(req.params.id);
     if (!post) return res.status(404).json({ msg: 'Post not found' });
@@ -78,3 +78,5 @@ exports.deletePost = async (req, res) => {
     res.status(500).json({ msg: 'Server Error' });
   }
 };
+
+export default { getAllPosts, getPostById, createPost, updatePost, deletePost };
