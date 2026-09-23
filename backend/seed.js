@@ -1,22 +1,14 @@
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import connectDB from "./config/db.js";
-import authRoutes from "./routes/authRoutes.js";
-import postRoutes from "./routes/postRoutes.js";
+import "dotenv/config";
+import connectDB from "./src/config/db.js";
+import User from "./src/models/User.js";
 
-dotenv.config();
-connectDB();
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => res.send("Blog API is running..."));
-
-app.use("/api/auth", authRoutes);
-app.use("/api/posts", postRoutes);
-
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+await connectDB();
+const email = process.env.ADMIN_EMAIL || "admin@example.com";
+const password = process.env.ADMIN_PASSWORD || "change-this-password";
+let admin = await User.findOne({ email });
+if (!admin) admin = new User({ name: "Administrator", email, password, role: "admin" });
+else { admin.name = "Administrator"; admin.password = password; admin.role = "admin"; }
+await admin.save();
+console.log(`Admin account ready for ${email}. Set ADMIN_PASSWORD in .env before production use.`);
+process.exit(0);
 

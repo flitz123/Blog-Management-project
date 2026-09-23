@@ -7,6 +7,8 @@ export default function PostView() {
   const { id } = useParams();
   const [post, setPost] = useState(null);
   const [comment, setComment] = useState('');
+  const [error, setError] = useState('');
+  const [liked, setLiked] = useState(false);
   const { user } = useContext(AuthContext);
 
   const fetchPost = async () => {
@@ -14,55 +16,55 @@ export default function PostView() {
     setPost(res.data);
   };
 
+  const handleLike = async () => {
+    if (!user) return setError('Sign in to react to an article.');
+    const res = await api.post(`/posts/${id}/like`);
+    setLiked(res.data.liked);
+    setPost(current => ({ ...current, likes: Array(res.data.likes) }));
+  };
+
   const handleComment = async (e) => {
     e.preventDefault();
-    await api.post(`/posts/${id}/comments`, { text: comment });
-    setComment('');
-    fetchPost();
+    try { await api.post(`/posts/${id}/comments`, { text: comment }); setComment(''); fetchPost(); } catch (err) { setError(err.response?.data?.message || 'Could not post your comment.'); }
   };
 
   useEffect(() => {
     fetchPost();
   }, [id]);
 
-  if (!post) return <p>Loading...</p>;
+  if (!post) return <p className="status-message">Loading note...</p>;
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h2 className="text-3xl font-bold mb-2">{post.title}</h2>
-      <p className="text-gray-600 text-sm mb-4">by {post.author?.name}</p>
+    <article className="post-view"><p className="eyebrow">{post.category || 'Journal entry'}</p><h1>{post.title}</h1><p className="post-meta">By {post.author?.name || 'Anonymous'} · {new Date(post.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })} · {post.views || 0} views</p><button className="button button-primary" onClick={handleLike}>{liked ? 'Liked' : 'Like'} · {post.likes?.length || 0}</button>
       <div
-        className="prose"
+        className="post-content"
         dangerouslySetInnerHTML={{ __html: post.content }}
       ></div>
 
-      <hr className="my-4" />
+      <div className="rule" />
 
-      <h3 className="text-lg font-semibold mb-2">Comments</h3>
-      {post.comments.length === 0 ? <p>No comments yet.</p> : (
+      <h2>Responses <span>{post.comments?.length || 0}</span></h2>
+      {!post.comments?.length ? <p className="status-message">Be the first to leave a thought.</p> : (
         post.comments.map((c, i) => (
-          <div key={i} className="border-t py-2">
-            <p className="text-gray-800">{c.text}</p>
-            <span className="text-sm text-gray-500">by {c.author?.name || 'User'}</span>
+          <div key={c._id || i} className="comment-item">
+            <p>{c.text}</p><span>by {c.author?.name || 'Reader'}</span>
           </div>
         ))
       )}
 
       {user && (
-        <form onSubmit={handleComment} className="mt-4">
+        <form onSubmit={handleComment} className="comment-form">
           <textarea
-            className="w-full border rounded p-2"
+            className="field"
             placeholder="Add a comment..."
             value={comment}
             onChange={e => setComment(e.target.value)}
             required
           ></textarea>
-          <button type="submit" className="bg-blue-600 text-white px-3 py-1 mt-2 rounded">
-            Post Comment
-          </button>
+          {error && <p className="form-error">{error}</p>}<button type="submit" className="button button-dark">Post response</button>
         </form>
       )}
-    </div>
+    </article>
   );
 }
 

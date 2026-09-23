@@ -2,10 +2,14 @@ import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },
-  email: { type: String, required: true, unique: true },
+  name: { type: String, required: true, trim: true, maxlength: 80 },
+  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
   password: { type: String, required: true },
-});
+  role: { type: String, enum: ["reader", "author", "admin"], default: "author" },
+  bio: { type: String, default: "", maxlength: 500 },
+  avatar: { type: String, default: "" },
+  subscribed: { type: Boolean, default: false },
+}, { timestamps: true });
 
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();

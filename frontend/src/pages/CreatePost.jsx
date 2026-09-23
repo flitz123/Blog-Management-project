@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
 import api from '../api/axios';
 
 export default function CreatePost() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
+  const [category, setCategory] = useState('');
+  const [status, setStatus] = useState('draft');
   const [error, setError] = useState('');
   const nav = useNavigate();
 
@@ -23,25 +23,24 @@ export default function CreatePost() {
       const res = await api.post('/posts', {
         title,
         content,
+        category,
+        status,
         tags: tags.split(',').map(tag => tag.trim()).filter(Boolean)
       });
-      alert('Post created successfully!');
       nav(`/posts/${res.data._id}`);
     } catch (err) {
-      setError(err.response?.data?.msg || 'Failed to create post.');
+      setError(err.response?.data?.message || err.response?.data?.msg || 'Failed to create post.');
     }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-4">
-      <h2 className="text-2xl font-bold mb-4">Create a New Post</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="editor-page"><div className="editor-heading"><p className="eyebrow">New entry</p><h1>Put something good into the world.</h1><p>Write plainly. Leave space for the reader.</p></div><form onSubmit={handleSubmit} className="editor-form">
         <input
           type="text"
           placeholder="Post title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full border rounded p-2"
+          className="field field-title"
           required
         />
         <input
@@ -49,22 +48,18 @@ export default function CreatePost() {
           placeholder="Tags (comma separated)"
           value={tags}
           onChange={(e) => setTags(e.target.value)}
-          className="w-full border rounded p-2"
+          className="field"
         />
-        <ReactQuill
-          theme="snow"
+        <input type="text" placeholder="Category" value={category} onChange={e => setCategory(e.target.value)} className="field" />
+        <select value={status} onChange={e => setStatus(e.target.value)} className="field" aria-label="Post status"><option value="draft">Save as draft</option><option value="published">Publish now</option></select>
+        <textarea
           value={content}
-          onChange={setContent}
+          onChange={(e) => setContent(e.target.value)}
           placeholder="Write your post here..."
-          className="bg-white rounded"
+          className="field editor-textarea"
+          required
         />
-        {error && <p className="text-red-600">{error}</p>}
-        <button
-          type="submit"
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Publish Post
-        </button>
+        {error && <p className="form-error">{error}</p>}<button type="submit" className="button button-primary">Publish note <span>↗</span></button>
       </form>
     </div>
   );

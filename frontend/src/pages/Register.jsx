@@ -14,23 +14,22 @@ export default function Register() {
     setError('');
     try {
       await api.post('/auth/register', { name, email, password });
-      alert('Registration successful! You can now login.');
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.msg || 'Registration failed.');
+      setError(err.response?.data?.message || err.response?.data?.msg || 'Registration failed.');
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h2 className="text-2xl font-bold mb-4">Register</h2>
-      <form onSubmit={handleSubmit} className="w-80 bg-white p-6 rounded-lg shadow-md">
+    <div className="auth-layout"><div className="auth-intro"><p className="eyebrow">Make a mark</p><h1>Your next favorite read starts here.</h1><p>Join a thoughtful corner of the internet for curious writers and readers.</p></div>
+      <form onSubmit={handleSubmit} className="form-card">
+        <h2>Create your account</h2><p className="form-note">It takes less than a minute.</p>
         <input
           type="text"
           placeholder="Name"
           value={name}
           onChange={e => setName(e.target.value)}
-          className="w-full mb-3 p-2 border rounded"
+          className="field"
           required
         />
         <input
@@ -38,7 +37,7 @@ export default function Register() {
           placeholder="Email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="w-full mb-3 p-2 border rounded"
+          className="field"
           required
         />
         <input
@@ -46,15 +45,15 @@ export default function Register() {
           placeholder="Password (min 6 chars)"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          className="w-full mb-3 p-2 border rounded"
+          className="field"
           required
         />
-        {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-        <button type="submit" className="w-full bg-green-600 text-white py-2 rounded">
-          Register
+        {error && <p className="form-error">{error}</p>}
+        <button type="submit" className="button button-primary">
+          Create account
         </button>
-        <p className="text-sm mt-2 text-center">
-          Already have an account? <Link className="text-blue-500" to="/login">Login</Link>
+        <p className="form-footnote">
+          Already have an account? <Link to="/login">Sign in</Link>
         </p>
       </form>
     </div>

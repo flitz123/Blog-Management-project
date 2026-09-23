@@ -19,8 +19,8 @@ export const AuthProvider = ({ children }) => {
     setUser(loggedUser);
   };
 
-  const register = async (username, email, password) => {
-    await api.post("/auth/register", { username, email, password });
+  const register = async (name, email, password) => {
+    await api.post("/auth/register", { name, email, password });
   };
 
   const logout = () => {

@@ -12,18 +12,20 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-gray-800 text-white px-4 py-2 flex justify-between items-center">
-      <Link to="/" className="text-lg font-bold">BlogSys</Link>
-      <div className="space-x-4">
+    <nav className="topbar">
+      <Link to="/" className="brand"><span className="brand-mark">B</span>Fieldnotes</Link>
+      <div className="nav-actions">
         {user ? (
           <>
-            <span>Hello, {user.name}</span>
-            <button onClick={handleLogout} className="bg-red-600 px-3 py-1 rounded">Logout</button>
+            <Link to="/create" className="nav-link">Write</Link>
+            {user.role === 'admin' && <Link to="/admin" className="nav-link">Admin</Link>}
+            <span className="user-chip">{user.name}</span>
+            <button onClick={handleLogout} className="button button-quiet">Log out</button>
           </>
         ) : (
           <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
+            <Link to="/login" className="nav-link">Sign in</Link>
+            <Link to="/register" className="button button-dark">Join free</Link>
           </>
         )}
       </div>

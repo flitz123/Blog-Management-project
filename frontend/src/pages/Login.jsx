@@ -1,6 +1,5 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 
 export default function Login() {
@@ -14,24 +13,23 @@ export default function Login() {
     e.preventDefault();
     setError('');
     try {
-      const res = await api.post('/auth/login', { email, password });
-      login(res.data);
-      navigate('/dashboard');
+      await login(email, password);
+      navigate('/');
     } catch (err) {
-      setError(err.response?.data?.msg || 'Invalid credentials');
+      setError(err.response?.data?.message || err.response?.data?.msg || 'Invalid credentials');
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h2 className="text-2xl font-bold mb-4">Login</h2>
-      <form onSubmit={handleSubmit} className="w-80 bg-white p-6 rounded-lg shadow-md">
+    <div className="auth-layout"><div className="auth-intro"><p className="eyebrow">Welcome back</p><h1>Good ideas deserve a place to grow.</h1><p>Keep reading, keep writing, and pick up where you left off.</p></div>
+      <form onSubmit={handleSubmit} className="form-card">
+        <h2>Sign in</h2><p className="form-note">Use your Fieldnotes account.</p>
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="w-full mb-3 p-2 border rounded"
+          className="field"
           required
         />
         <input
@@ -39,15 +37,15 @@ export default function Login() {
           placeholder="Password"
           value={password}
           onChange={e => setPassword(e.target.value)}
-          className="w-full mb-3 p-2 border rounded"
+          className="field"
           required
         />
-        {error && <p className="text-red-600 text-sm mb-2">{error}</p>}
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded">
-          Login
+        {error && <p className="form-error">{error}</p>}
+        <button type="submit" className="button button-primary">
+          Sign in
         </button>
-        <p className="text-sm mt-2 text-center">
-          Don’t have an account? <Link className="text-blue-500" to="/register">Register</Link>
+        <p className="form-footnote">
+          Don’t have an account? <Link to="/register">Create one</Link>
         </p>
       </form>
     </div>
