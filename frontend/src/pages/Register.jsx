@@ -21,7 +21,7 @@ export default function Register() {
   };
 
   return (
-    <div className="auth-layout"><div className="auth-intro"><p className="eyebrow">Make a mark</p><h1>Your next favorite read starts here.</h1><p>Join a thoughtful corner of the internet for curious writers and readers.</p></div>
+    <div className="auth-layout"><div className="auth-intro"><p className="eyebrow">Make a mark</p><h1>Your next favorite read starts here.</h1><p>Join as a reader. An administrator can grant writing access.</p></div>
       <form onSubmit={handleSubmit} className="form-card">
         <h2>Create your account</h2><p className="form-note">It takes less than a minute.</p>
         <input
@@ -42,10 +42,11 @@ export default function Register() {
         />
         <input
           type="password"
-          placeholder="Password (min 6 chars)"
+          placeholder="Password (min 8 chars)"
           value={password}
           onChange={e => setPassword(e.target.value)}
           className="field"
+          minLength={8}
           required
         />
         {error && <p className="form-error">{error}</p>}

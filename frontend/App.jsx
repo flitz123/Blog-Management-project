@@ -10,6 +10,8 @@ import Dashboard from "./src/pages/Dashboard";
 import CreatePost from "./src/pages/CreatePost";
 import PostView from "./src/pages/PostView";
 import Admin from "./src/pages/Admin";
+import MyPosts from "./src/pages/MyPosts";
+import Profile from "./src/pages/Profile";
 
 export default function App() {
   return (
@@ -21,11 +23,14 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/posts/:id" element={<PostView />} />
+          <Route path="/posts/:id/edit" element={<ProtectedRoute roles={["author", "admin"]}><CreatePost /></ProtectedRoute>} />
+          <Route path="/my-posts" element={<ProtectedRoute roles={["author", "admin"]}><MyPosts /></ProtectedRoute>} />
+          <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/admin" element={<ProtectedRoute roles={["admin"]}><Admin /></ProtectedRoute>} />
           <Route
             path="/create"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["author", "admin"]}>
                 <CreatePost />
               </ProtectedRoute>
             }

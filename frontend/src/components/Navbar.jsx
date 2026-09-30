@@ -17,7 +17,9 @@ export default function Navbar() {
       <div className="nav-actions">
         {user ? (
           <>
-            <Link to="/create" className="nav-link">Write</Link>
+            {['author', 'admin'].includes(user.role) && <Link to="/create" className="nav-link">Write</Link>}
+            {['author', 'admin'].includes(user.role) && <Link to="/my-posts" className="nav-link">My writing</Link>}
+            <Link to="/profile" className="nav-link">Profile</Link>
             {user.role === 'admin' && <Link to="/admin" className="nav-link">Admin</Link>}
             <span className="user-chip">{user.name}</span>
             <button onClick={handleLogout} className="button button-quiet">Log out</button>
