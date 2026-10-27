@@ -34,7 +34,7 @@ app.use("/api", publicRoutes);
 
 app.use((error, _req, res, _next) => {
   console.error(error);
-  const status = error.status || (error.code === 11000 ? 409 : error.name === "ValidationError" ? 400 : 500);
+  const status = error.status || (error.code === "23505" ? 409 : error.code === "23503" ? 400 : error.name === "ValidationError" ? 400 : 500);
   res.status(status).json({ message: status === 500 ? "Internal server error" : error.message });
 });
 

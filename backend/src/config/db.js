@@ -1,17 +1,32 @@
-import mongoose from "mongoose";
+import { createClient } from "@supabase/supabase-js";
 
-const connectDB = async () => {
-  if (!process.env.MONGO_URI) {
-    throw new Error("MONGO_URI is required. Add your MongoDB connection string to backend/.env.");
+let supabase;
+
+export const getSupabase = () => {
+  if (supabase) return supabase;
+
+  const { SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY } = process.env;
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are required in backend/.env.");
   }
 
+  supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  return supabase;
+};
+
+export const unwrap = ({ data, error }) => {
+  if (error) throw error;
+  return data;
+};
+
+const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 5000,
-    });
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    unwrap(await getSupabase().from("users").select("id").limit(1));
+    console.log("Supabase connected");
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error("Supabase connection failed:", error.message);
     throw error;
   }
 };

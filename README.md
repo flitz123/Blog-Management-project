@@ -12,13 +12,16 @@
 
 ## Local Setup
 
-1. In `backend`, install dependencies and copy `.env.example` to `.env`.
-2. Set `MONGO_URI` to the Atlas connection string, and set unique values for `JWT_SECRET` and `CRON_SECRET`. Configure the `ADMIN_EMAIL` and `ADMIN_PASSWORD` seed credentials.
-3. In MongoDB Atlas, open **Network Access** and add the current machine's public IP address. An IP allowlist change is made in Atlas; it does not normally require changing `MONGO_URI`. If the database username or password changed, update the URI and URL-encode reserved characters in the credentials.
-4. Run `npm run seed` once in `backend` to create or update the admin account, then run `npm run dev`.
-5. In `frontend`, install dependencies, copy `.env.example` to `.env`, and run `npm run dev`.
+1. Create a Supabase project and open its **SQL Editor**.
+2. Run the schema in [`backend/supabase/schema.sql`](./backend/supabase/schema.sql) to create the application tables and indexes.
+3. In `backend`, install dependencies and copy `.env.example` to `.env`. Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from the Supabase project's API settings. The service-role key is for the backend only; never put it in frontend environment variables or commit it.
+4. Set unique values for `JWT_SECRET` and `CRON_SECRET`. Configure the `ADMIN_EMAIL` and `ADMIN_PASSWORD` seed credentials.
+5. Run `npm run seed` once in `backend` to create or update the admin account, then run `npm run dev`.
+6. In `frontend`, install dependencies, copy `.env.example` to `.env`, and run `npm run dev`.
 
-The backend listens on port `5000` and the Vite frontend on port `5173` by default. Set `CLIENT_URL` to the frontend origin. Never commit `.env` files or use an unrestricted Atlas IP allowlist in production.
+The backend requires Node.js 22 or newer. Existing data in MongoDB is not copied automatically; export and migrate it separately if you need to keep it.
+
+The backend listens on port `5000` and the Vite frontend on port `5173` by default. Set `CLIENT_URL` to the frontend origin. Row-level security is enabled on the application tables; the backend uses its server-only service-role key to access them. Never expose that key to the browser or commit `.env` files.
 
 ## Optional Services
 
@@ -28,4 +31,4 @@ Scheduled posts publish every minute on a persistent Node server. Vercel uses th
 
 ## Deployment
 
-Set the backend environment variables in the hosting provider, including `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`, and `CRON_SECRET`. Set frontend `VITE_API_URL` to the deployed API base URL ending in `/api`. The `backend/vercel.json` cron job requires a Vercel deployment with cron support.
+Set the backend environment variables in the hosting provider, including `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `CLIENT_URL`, and `CRON_SECRET`. Set frontend `VITE_API_URL` to the deployed API base URL ending in `/api`. The `backend/vercel.json` cron job requires a Vercel deployment with cron support.

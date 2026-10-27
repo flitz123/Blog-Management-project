@@ -1,9 +1,11 @@
-import Post from "../models/Post.js";
+import { getSupabase, unwrap } from "../config/db.js";
 
 export default async function publishScheduledPosts() {
-  const result = await Post.updateMany(
-    { status: "scheduled", scheduledAt: { $lte: new Date() } },
-    { $set: { status: "published", scheduledAt: null } }
-  );
-  return result.modifiedCount;
+  const posts = unwrap(await getSupabase()
+    .from("posts")
+    .update({ status: "published", scheduled_at: null, updated_at: new Date().toISOString() })
+    .eq("status", "scheduled")
+    .lte("scheduled_at", new Date().toISOString())
+    .select("id"));
+  return posts.length;
 }
