@@ -30,12 +30,7 @@ create table if not exists public.posts (
   author_id uuid not null references public.users(id) on delete cascade,
   views integer not null default 0 check (views >= 0),
   revisions jsonb not null default '[]'::jsonb,
-  search_vector tsvector generated always as (
-    setweight(to_tsvector('english', coalesce(title, '')), 'A') ||
-    setweight(to_tsvector('english', coalesce(content, '')), 'B') ||
-    setweight(to_tsvector('english', coalesce(array_to_string(tags, ' '), '')), 'C') ||
-    setweight(to_tsvector('english', coalesce(category, '')), 'C')
-  ) stored,
+  search_vector tsvector,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -79,6 +74,28 @@ create table if not exists public.subscriptions (
 create index if not exists posts_status_created_at_idx on public.posts(status, created_at desc);
 create index if not exists posts_author_updated_at_idx on public.posts(author_id, updated_at desc);
 create index if not exists posts_search_vector_idx on public.posts using gin(search_vector);
+create or replace function public.update_post_search_vector()
+returns trigger
+language plpgsql
+security invoker
+set search_path = public
+as $$
+begin
+  new.search_vector :=
+    setweight(to_tsvector('english', coalesce(new.title, '')), 'A') ||
+    setweight(to_tsvector('english', coalesce(new.content, '')), 'B') ||
+    setweight(to_tsvector('english', coalesce(array_to_string(new.tags, ' '), '')), 'C') ||
+    setweight(to_tsvector('english', coalesce(new.category, '')), 'C');
+  return new;
+end;
+$$;
+
+drop trigger if exists posts_update_search_vector on public.posts;
+create trigger posts_update_search_vector
+before insert or update of title, content, tags, category
+on public.posts
+for each row execute function public.update_post_search_vector();
+
 create index if not exists comments_post_status_created_at_idx on public.comments(post_id, status, created_at);
 create index if not exists comments_status_created_at_idx on public.comments(status, created_at desc);
 create index if not exists categories_parent_id_idx on public.categories(parent_id);
@@ -115,3 +132,5 @@ alter table public.comments enable row level security;
 alter table public.post_likes enable row level security;
 alter table public.categories enable row level security;
 alter table public.subscriptions enable row level security;
+
+notify pgrst, 'reload schema';

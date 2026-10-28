@@ -33,7 +33,7 @@ export default function Dashboard() {
 
   return (
     <div className="home-page">
-      <section className="hero-panel"><div><p className="eyebrow">The Fieldnotes journal</p><h1>Ideas with a little more room to breathe.</h1><p className="hero-copy">A calm place for essays, observations, and the small discoveries that stay with you.</p></div><div className="hero-stamp">Since<br /><strong>2024</strong></div></section>
+      <section className="hero-panel"><div><p className="eyebrow">The Fieldnotes journal</p><h1>Ideas with <em>a little more room</em> to breathe.</h1><p className="hero-copy">A calm place for essays, observations, and the small discoveries that stay with you.</p></div></section>
       <div className="section-heading"><div><p className="eyebrow">Fresh from the journal</p><h2>Latest notes</h2></div>{user && <Link to="/create" className="button button-primary">Write a note <span>↗</span></Link>}</div>
       <div className="discovery-bar"><input className="field" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search articles..." aria-label="Search articles" /><select className="field" value={category} onChange={e => setCategory(e.target.value)} aria-label="Filter by category"><option value="">All categories</option>{categories.map(item => <option key={item._id} value={item.name}>{item.name}</option>)}</select></div>
       {loading && <p className="status-message">Loading the latest notes...</p>}

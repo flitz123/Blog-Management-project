@@ -13,7 +13,7 @@ export default function Navbar() {
 
   return (
     <nav className="topbar">
-      <Link to="/" className="brand"><span className="brand-mark">B</span>Fieldnotes</Link>
+      <Link to="/" className="brand" aria-label="Fieldnotes home"><span className="brand-name">Field</span><span className="brand-accent">notes</span></Link>
       <div className="nav-actions">
         {user ? (
           <>

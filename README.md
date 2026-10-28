@@ -31,4 +31,10 @@ Scheduled posts publish every minute on a persistent Node server. Vercel uses th
 
 ## Deployment
 
-Set the backend environment variables in the hosting provider, including `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `CLIENT_URL`, and `CRON_SECRET`. Set frontend `VITE_API_URL` to the deployed API base URL ending in `/api`. The `backend/vercel.json` cron job requires a Vercel deployment with cron support.
+Deploy `backend` and `frontend` as separate Vercel projects.
+
+1. Import the repository and set the backend project's **Root Directory** to `backend`. Add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `CRON_SECRET`, and `CLIENT_URL`. `CLIENT_URL` must be the deployed frontend URL, without a trailing slash. Redeploy after changing environment variables.
+2. Set the frontend project's **Root Directory** to `frontend`. Add `VITE_API_URL=https://your-backend-domain.vercel.app/api`, or the equivalent deployed backend URL ending in `/api`.
+3. Deploy the frontend. Vercel serves the Vite build and the included SPA rewrite handles client-side routes.
+
+The backend project includes `vercel.json`; its cron endpoint uses `CRON_SECRET` as a Bearer token. Vercel cron support must be available on the selected plan.

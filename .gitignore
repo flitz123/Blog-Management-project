@@ -3,8 +3,10 @@ frontend/dist/
 backend/dist/
 .env
 .env.*
-!.env.example
 !backend/.env.example
+!frontend/.env.example
 *.log
 .DS_Store
+backend/.env
+backend/.env
 backend/.env
