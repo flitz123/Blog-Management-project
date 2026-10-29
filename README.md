@@ -31,10 +31,10 @@ Scheduled posts publish every minute on a persistent Node server. Vercel uses th
 
 ## Deployment
 
-Deploy `backend` and `frontend` as separate Vercel projects.
+Import the repository once as a Vercel services project. The root [`vercel.json`](./vercel.json) deploys the Express `backend` service and Vite `frontend` service, exposing `/api/*` on the backend and all other paths on the frontend.
 
-1. Import the repository and set the backend project's **Root Directory** to `backend`. Add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `CRON_SECRET`, and `CLIENT_URL`. `CLIENT_URL` must be the deployed frontend URL, without a trailing slash. Redeploy after changing environment variables.
-2. Set the frontend project's **Root Directory** to `frontend`. Add `VITE_API_URL=https://your-backend-domain.vercel.app/api`, or the equivalent deployed backend URL ending in `/api`.
-3. Deploy the frontend. Vercel serves the Vite build and the included SPA rewrite handles client-side routes.
+1. Add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, `CRON_SECRET`, and optionally `CLIENT_URL` to the shared Vercel project environment. For local development, `CLIENT_URL` defaults to `http://localhost:5173`.
+2. Do not set `VITE_API_URL` for the normal Vercel deployment; the frontend uses `/api` and Vercel routes it to the backend. For local development it falls back to `http://localhost:5000/api`.
+3. Deploy and run `vercel dev` to test the frontend, backend, rewrites, and cron route together.
 
-The backend project includes `vercel.json`; its cron endpoint uses `CRON_SECRET` as a Bearer token. Vercel cron support must be available on the selected plan.
+The root `vercel.json` defines the backend cron endpoint, which uses `CRON_SECRET` as a Bearer token. Vercel cron support must be available on the selected plan.

@@ -1,12 +1,13 @@
 node_modules/
 frontend/dist/
 backend/dist/
+
+# Local environment files may contain credentials and must never be committed.
 .env
 .env.*
-!backend/.env.example
-!frontend/.env.example
+*.env
+*.env.*
+!**/.env.example
+
 *.log
 .DS_Store
-backend/.env
-backend/.env
-backend/.env

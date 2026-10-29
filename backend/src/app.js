@@ -12,7 +12,9 @@ const app = express();
 
 app.use(helmet());
 const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173").split(",").map((origin) => origin.trim());
-app.use(cors({ origin: (origin, callback) => callback(null, !origin || allowedOrigins.includes(origin)) }));
+app.use(cors({
+  origin: (origin, callback) => callback(null, !origin || process.env.VERCEL || allowedOrigins.includes(origin))
+}));
 app.use(express.json({ limit: "5mb" }));
 
 app.get("/", (_req, res) => res.json({ status: "ok", service: "blog-api" }));
