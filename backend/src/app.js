@@ -18,6 +18,13 @@ app.use(cors({
 app.use(express.json({ limit: "5mb" }));
 
 app.get("/", (_req, res) => res.json({ status: "ok", service: "blog-api" }));
+app.get("/api/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    supabaseConfigured: Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
+    jwtConfigured: Boolean(process.env.JWT_SECRET),
+  });
+});
 app.get("/api/cron/publish-scheduled", async (req, res, next) => {
   try {
     const secret = process.env.CRON_SECRET;
