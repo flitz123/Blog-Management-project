@@ -27,7 +27,7 @@ The backend listens on port `5000` and the Vite frontend on port `5173` by defau
 
 Set `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET` to enable in-editor media uploads. Without these values, posts can still use externally hosted media URLs. Uploads are limited to common image formats, MP4/WebM/MOV video, and PDF, up to 20 MB per file.
 
-Scheduled posts publish through the Vercel cron configuration in [vercel.json](./vercel.json). Every minute, Vercel calls the protected `/api/cron/publish-scheduled` endpoint with `CRON_SECRET` and never starts the local publishing interval.
+Scheduled posts publish through the daily Vercel cron configuration in [vercel.json](./vercel.json). Once per day at midnight UTC, Vercel calls the protected `/api/cron/publish-scheduled` endpoint with `CRON_SECRET`. Posts whose scheduled time has passed are published, so scheduled publication may be delayed until the next daily run.
 
 
 ## Deployment on Vercel
@@ -41,7 +41,7 @@ The root [`vercel.json`](./vercel.json) deploys the repository as one services p
 
 1. Import the repository into Vercel and do not set separate root directories.
 2. Add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, and a new `CRON_SECRET` in the Vercel project environment. Add `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CLOUDINARY_*` values if needed, and optionally `CLIENT_URL`.
-3. Deploy. Vercel's cron invokes `/api/cron/publish-scheduled` every minute and authenticates it with the project `CRON_SECRET`.
+3. Deploy. On the Hobby plan, Vercel invokes `/api/cron/publish-scheduled` once daily at midnight UTC and authenticates it with the project `CRON_SECRET`. Upgrade to Pro for more frequent cron runs.
 4. Redeploy after changing environment variables.
 5. Run `npm run seed` locally with the deployed environment values before using the configured admin account.
 
