@@ -18,11 +18,26 @@ app.use(cors({
 app.use(express.json({ limit: "5mb" }));
 
 app.get("/", (_req, res) => res.json({ status: "ok", service: "blog-api" }));
-app.get("/api/health", (_req, res) => {
-  res.json({
-    status: "ok",
-    supabaseConfigured: Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY),
-    jwtConfigured: Boolean(process.env.JWT_SECRET),
+app.get("/api/health", async (_req, res) => {
+  const supabaseConfigured = Boolean(process.env.SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  const jwtConfigured = Boolean(process.env.JWT_SECRET);
+  let database = "not_configured";
+
+  if (supabaseConfigured) {
+    try {
+      const { getSupabase } = await import("./config/db.js");
+      const { error } = await getSupabase().from("users").select("id").limit(1);
+      database = error ? `error:${error.message}` : "connected";
+    } catch (error) {
+      database = `error:${error.message}`;
+    }
+  }
+
+  res.status(database === "connected" && jwtConfigured ? 200 : 503).json({
+    status: database === "connected" && jwtConfigured ? "ok" : "configuration_error",
+    supabaseConfigured,
+    jwtConfigured,
+    database,
   });
 });
 app.get("/api/cron/publish-scheduled", async (req, res, next) => {
