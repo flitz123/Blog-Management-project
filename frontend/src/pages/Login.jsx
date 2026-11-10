@@ -16,7 +16,13 @@ export default function Login() {
       await login(email, password);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.msg || 'Invalid credentials');
+      setError(
+        err.response?.data?.message ||
+        err.response?.data?.msg ||
+        (err.response
+          ? `Sign-in failed (HTTP ${err.response.status}).`
+          : 'Unable to reach the sign-in service. Please try again.')
+      );
     }
   };
 

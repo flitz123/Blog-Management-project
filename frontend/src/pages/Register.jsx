@@ -16,7 +16,13 @@ export default function Register() {
       await api.post('/auth/register', { name, email, password });
       navigate('/login');
     } catch (err) {
-      setError(err.response?.data?.message || err.response?.data?.msg || 'Registration failed.');
+      setError(
+        err.response?.data?.message ||
+        err.response?.data?.msg ||
+        (err.response
+          ? `Registration failed (HTTP ${err.response.status}).`
+          : 'Unable to reach the registration service. Please try again.')
+      );
     }
   };
 
@@ -60,4 +66,3 @@ export default function Register() {
     </div>
   );
 }
-

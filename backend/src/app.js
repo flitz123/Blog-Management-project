@@ -15,6 +15,13 @@ const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173").split
 app.use(cors({
   origin: (origin, callback) => callback(null, !origin || Boolean(process.env.VERCEL) || allowedOrigins.includes(origin))
 }));
+app.use((req, _res, next) => {
+  const vercelFunctionPrefix = "/api/index.js/";
+  if (req.url.startsWith(vercelFunctionPrefix)) {
+    req.url = `/api/${req.url.slice(vercelFunctionPrefix.length)}`;
+  }
+  next();
+});
 app.use(express.json({ limit: "5mb" }));
 
 app.get("/", (_req, res) => res.json({ status: "ok", service: "blog-api" }));
