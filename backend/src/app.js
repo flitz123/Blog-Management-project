@@ -16,9 +16,14 @@ app.use(cors({
   origin: (origin, callback) => callback(null, !origin || Boolean(process.env.VERCEL) || allowedOrigins.includes(origin))
 }));
 app.use((req, _res, next) => {
-  const vercelFunctionPrefix = "/api/index.js/";
-  if (req.url.startsWith(vercelFunctionPrefix)) {
-    req.url = `/api/${req.url.slice(vercelFunctionPrefix.length)}`;
+  const requestUrl = new URL(req.url, "http://localhost");
+  if (requestUrl.pathname === "/api/index.js") {
+    const routePath = requestUrl.searchParams.get("__route");
+    if (routePath) {
+      requestUrl.searchParams.delete("__route");
+      const query = requestUrl.searchParams.toString();
+      req.url = `/api/${routePath}${query ? `?${query}` : ""}`;
+    }
   }
   next();
 });
