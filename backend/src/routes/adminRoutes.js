@@ -109,7 +109,7 @@ router.get("/categories", async (_req, res, next) => {
   try {
     const categories = unwrap(await getSupabase()
       .from("categories")
-      .select("*, parent:categories!categories_parent_id_fkey(id, name)")
+      .select("*")
       .order("name"));
     res.json(categories.map(mapCategory));
   } catch (error) {
