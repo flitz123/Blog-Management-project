@@ -7,8 +7,16 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+const requireAuthConfig = (_req, res, next) => {
+  const missing = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "JWT_SECRET"]
+    .filter((key) => !process.env[key]);
+  if (missing.length) {
+    return res.status(503).json({ message: `Authentication is not configured. Set ${missing.join(", ")} in the backend environment.` });
+  }
+  next();
+};
 
-router.post("/register", async (req, res, next) => {
+router.post("/register", requireAuthConfig, async (req, res, next) => {
   const { name, username, email, password } = req.body;
   const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
   if ((!name && !username) || !/^\S+@\S+\.\S+$/.test(normalizedEmail) || typeof password !== "string" || password.length < 8) {
@@ -34,7 +42,7 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
-router.post("/login", async (req, res, next) => {
+router.post("/login", requireAuthConfig, async (req, res, next) => {
   const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
   const { password } = req.body;
   try {

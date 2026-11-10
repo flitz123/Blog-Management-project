@@ -46,3 +46,9 @@ The root [`vercel.json`](./vercel.json) deploys the repository as one services p
 5. Run `npm run seed` locally with the deployed environment values before using the configured admin account.
 
 Do not reuse secrets that were committed previously. Vercel's cron schedule requires a supported account plan, so check the project dashboard if cron invocations do not appear.
+
+### Deploying the backend as a separate Vercel project
+
+If the backend has its own Vercel project, set its **Root Directory** to `backend`. The [`backend/vercel.json`](./backend/vercel.json) install command is relative to that directory. Set `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `JWT_SECRET` in that backend project's environment variables before deploying.
+
+For a separately deployed frontend, set `VITE_API_URL` in the frontend project's environment variables to the backend deployment URL ending in `/api` (for example, `https://your-backend.vercel.app/api`) and redeploy the frontend. Without this setting, production builds use same-origin `/api`, as in the single-project setup above.
