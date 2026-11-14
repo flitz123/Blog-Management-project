@@ -40,10 +40,11 @@ The root [`vercel.json`](./vercel.json) deploys the repository as one services p
 - All other paths are routed to `frontend`.
 
 1. Import the repository into Vercel and do not set separate root directories.
-2. Add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, and a new `CRON_SECRET` in the Vercel project environment. Add `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `CLOUDINARY_*` values if needed, and optionally `CLIENT_URL`.
-3. Deploy. On the Hobby plan, Vercel invokes `/api/cron/publish-scheduled` once daily at midnight UTC and authenticates it with the project `CRON_SECRET`. Upgrade to Pro for more frequent cron runs.
-4. Redeploy after changing environment variables.
-5. Run `npm run seed` locally with the deployed environment values before using the configured admin account.
+2. Vercel does not read your local `backend/.env`. In **Project Settings → Environment Variables**, add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, and `CRON_SECRET` for Production (and Preview if you test preview deployments). Use the Supabase project URL and server-only service-role key; generate new, strong secrets for `JWT_SECRET` and `CRON_SECRET`. Add `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `CLOUDINARY_*` values if needed.
+3. For this single-project deployment, leave `VITE_API_URL` unset so the frontend uses the same-origin `/api` routes. If it is set to a local URL such as `http://localhost:5000/api`, production builds now fall back to `/api`. Do not add the Supabase service-role key to any `VITE_*` variable.
+4. Deploy, then check `https://<your-vercel-domain>/api/health`. Registration and sign-in require the response to report `"status":"ok"`; if it reports a configuration error, verify the Vercel environment variables and redeploy. On the Hobby plan, Vercel invokes `/api/cron/publish-scheduled` once daily at midnight UTC and authenticates it with the project `CRON_SECRET`. Upgrade to Pro for more frequent cron runs.
+5. Redeploy after changing environment variables.
+6. Run `npm run seed` locally with the deployed environment values before using the configured admin account.
 
 Do not reuse secrets that were committed previously. Vercel's cron schedule requires a supported account plan, so check the project dashboard if cron invocations do not appear.
 
