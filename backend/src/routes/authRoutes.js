@@ -7,19 +7,37 @@ import { protect } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+const databaseSchemaErrors = new Set(["PGRST204", "PGRST205", "42P01", "42703"]);
+const normalizeEmail = (email) => typeof email === "string" ? email.trim().toLowerCase() : "";
+
 const requireAuthConfig = (_req, res, next) => {
   const missing = ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY", "JWT_SECRET"]
     .filter((key) => !process.env[key]);
   if (missing.length) {
-    return res.status(503).json({ message: `Authentication is not configured. Set ${missing.join(", ")} in the backend environment.` });
+    return res.status(503).json({ message: `Authentication is not configured. Set ${missing.join(", ")} in the server environment.` });
   }
   next();
 };
 
+const handleAuthError = (error, res, next) => {
+  const code = error?.code;
+  if (code === "23505") {
+    return res.status(409).json({ message: "An account with this email already exists" });
+  }
+  if (databaseSchemaErrors.has(code)) {
+    console.error("Authentication database schema error:", error?.message || error);
+    return res.status(503).json({ message: "Authentication storage is unavailable. Check the Supabase users table schema." });
+  }
+  next(error);
+};
+
 router.post("/register", requireAuthConfig, async (req, res, next) => {
-  const { name, username, email, password } = req.body;
-  const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
-  if ((!name && !username) || !/^\S+@\S+\.\S+$/.test(normalizedEmail) || typeof password !== "string" || password.length < 8) {
+  const body = req.body ?? {};
+  const name = typeof body.name === "string" ? body.name.trim() : typeof body.username === "string" ? body.username.trim() : "";
+  const email = normalizeEmail(body.email);
+  const { password } = body;
+
+  if (!name || name.length > 80 || email.length > 254 || !/^\S+@\S+\.\S+$/.test(email) || typeof password !== "string" || password.length < 8) {
     return res.status(400).json({ message: "Name, valid email, and a password of at least 8 characters are required" });
   }
 
@@ -27,38 +45,41 @@ router.post("/register", requireAuthConfig, async (req, res, next) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const user = unwrap(await getSupabase()
       .from("users")
-      .insert({ name: name || username, email: normalizedEmail, password_hash: passwordHash })
-      .select("id, name, email, role, bio, avatar, created_at, updated_at")
+      .insert({ name, email, password_hash: passwordHash })
+      .select("id, name, email, role")
       .single());
-    const publicUser = mapUser(user);
     res.status(201).json({
       message: "User registered successfully",
       user: { id: user.id, _id: user.id, name: user.name, email: user.email, role: user.role },
-      token: generateToken(publicUser.id),
+      token: generateToken(user.id),
     });
   } catch (error) {
-    if (error.code === "23505") return res.status(409).json({ message: "An account with this email already exists" });
-    next(error);
+    handleAuthError(error, res, next);
   }
 });
 
 router.post("/login", requireAuthConfig, async (req, res, next) => {
-  const email = typeof req.body.email === "string" ? req.body.email.trim().toLowerCase() : "";
-  const { password } = req.body;
+  const body = req.body ?? {};
+  const email = normalizeEmail(body.email);
+  const { password } = body;
+  if (email.length > 254 || !/^\S+@\S+\.\S+$/.test(email) || typeof password !== "string" || !password) {
+    return res.status(400).json({ message: "A valid email and password are required" });
+  }
+
   try {
     const user = unwrap(await getSupabase()
       .from("users")
-      .select("*")
+      .select("id, name, email, password_hash, role, bio, avatar, subscribed, created_at, updated_at")
       .eq("email", email)
       .maybeSingle());
-    if (!user || typeof password !== "string" || !(await bcrypt.compare(password, user.password_hash))) {
+    if (!user || typeof user.password_hash !== "string" || !(await bcrypt.compare(password, user.password_hash))) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
 
     const publicUser = mapUser(user);
     res.json({ user: publicUser, token: generateToken(user.id) });
   } catch (error) {
-    next(error);
+    handleAuthError(error, res, next);
   }
 });
 

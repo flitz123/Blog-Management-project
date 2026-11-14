@@ -38,7 +38,7 @@ app.get("/api/health", async (_req, res) => {
   if (supabaseConfigured) {
     try {
       const { getSupabase } = await import("./config/db.js");
-      const { error } = await getSupabase().from("users").select("id").limit(1);
+      const { error } = await getSupabase().from("users").select("id, name, email, password_hash, role").limit(0);
       database = error ? `error:${error.message}` : "connected";
     } catch (error) {
       database = `error:${error.message}`;
