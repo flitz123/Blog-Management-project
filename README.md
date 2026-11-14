@@ -39,7 +39,7 @@ The root [`vercel.json`](./vercel.json) deploys the repository as one services p
 - `/api/(.*)` is routed to `backend`.
 - All other paths are routed to `frontend`.
 
-1. Import the repository into Vercel and do not set separate root directories.
+1. Import the repository into Vercel. In **Project Settings → Build and Deployment → Root Directory**, use the repository root (clear `frontend`; do not set `frontend` or `backend`). The root `vercel.json` needs both folders and the root-level `api` entry point.
 2. Vercel does not read your local `backend/.env`. In **Project Settings → Environment Variables**, add `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `JWT_SECRET`, and `CRON_SECRET` for Production (and Preview if you test preview deployments). Use the Supabase project URL and server-only service-role key; generate new, strong secrets for `JWT_SECRET` and `CRON_SECRET`. Add `ADMIN_EMAIL`, `ADMIN_PASSWORD`, and `CLOUDINARY_*` values if needed.
 3. For this single-project deployment, leave `VITE_API_URL` unset so the frontend uses the same-origin `/api` routes. If it is set to a local URL such as `http://localhost:5000/api`, production builds now fall back to `/api`. Do not add the Supabase service-role key to any `VITE_*` variable.
 4. Deploy, then check `https://<your-vercel-domain>/api/health`. Registration and sign-in require the response to report `"status":"ok"`; if it reports a configuration error, verify the Vercel environment variables and redeploy. On the Hobby plan, Vercel invokes `/api/cron/publish-scheduled` once daily at midnight UTC and authenticates it with the project `CRON_SECRET`. Upgrade to Pro for more frequent cron runs.
